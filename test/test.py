@@ -21,7 +21,9 @@ async def test_project(dut):
     dut.uio_in.value = 0
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 10)
+
     dut.rst_n.value = 1
+    await ClockCycles(dut.clk, 5)
 
     dut._log.info("Test project behavior")
 
@@ -36,27 +38,31 @@ async def test_project(dut):
     # Change it to match the actual expected output of your module:
     # assert dut.uo_out.value == 50
 
+    # await ClockCycles(dut.clk, 1)
+
     load_value = 0x32
     dut.uio_in.value = load_value
-    dut.ui_in.value = 0b11 #load enable
+    dut.ui_in.value = 0b01 #load enable
     await ClockCycles(dut.clk, 1)
-    for _ in range(3):
+    for _ in range(5):
         await ClockCycles(dut.clk, 1)
         assert dut.uo_out.value == load_value, "Failed to load value"
+        assert dut.uio_oe.value.integer == 0, "Output enable failed"
     
     dut.ui_in.value = 0b00 #disable load
     expected = load_value
-    for _ in range(4):
-        await ClockCycles(dut.clk, 1)
-        expected = (expected + 1) & 0xFF
-        assert all(bit == "z" for bit in dut.uo_out.value.binstr.lower()), "Output not high impedance"
-
-    dut.ui_in.value = 0b10  # enable count
     for i in range(5):
         await ClockCycles(dut.clk, 1)
-        actual = int(dut.uo_out.value)
-        assert actual == expected, f"Counter wrong! Expected {expected}, got {actual}"
+        assert dut.uo_out.value == expected, "Failed to count"
         expected = (expected + 1) & 0xFF
+
+    dut.ui_in.value = 0b10  # Enable output
+    for i in range(5):
+        await ClockCycles(dut.clk, 1)
+        assert dut.uo_out.value == expected, "Failed to count"
+        assert dut.uio_oe.value == "xxxxxxxx", "Output enable failed"
+        expected = (expected + 1) & 0xFF
+       
         
 
     

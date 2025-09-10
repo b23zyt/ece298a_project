@@ -25,9 +25,10 @@ module tt_um_b23zyt (
     .clk(clk),
     .rst_n(rst_n),
     .load_en(ui_in[0]),
-    .load_val(uio_in),
     .oe(ui_in[1]),
-    .output_val(uo_out)
+    .load_val(uio_in),
+    .count_val(uo_out),
+    .count_oe(uio_oe)
   );
   
   assign uio_out = 0;
