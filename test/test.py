@@ -60,7 +60,7 @@ async def test_project(dut):
     for i in range(5):
         await ClockCycles(dut.clk, 1)
         assert dut.uo_out.value == expected, "Failed to count"
-        assert dut.uio_oe.value == "xxxxxxxx", "Output enable failed"
+        assert dut.uio_oe.value == 0xFF, "Output enable failed"
         expected = (expected + 1) & 0xFF
        
         
